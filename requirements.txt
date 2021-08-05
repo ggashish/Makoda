@@ -1,0 +1,4 @@
+discord
+colorama
+tortoise-orm
+PyPika
