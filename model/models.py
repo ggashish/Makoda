@@ -2,12 +2,11 @@ import discord
 
 from model.functions import *
 from tortoise import fields, models
-from tortoise.models import Model
 
-__all__ = ("Guild")
+__all__ = ("Guild", )
 
 
-class Guild(Model):
+class Guild(models.Model):
     class Meta:
         table = "guild_data"
 

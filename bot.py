@@ -1,8 +1,10 @@
+import os 
 import discord
 import asyncio
 import aiohttp
 import config
 
+from utils.context import Context
 from tortoise import Tortoise
 from discord.ext import commands
 
@@ -11,7 +13,9 @@ from utils.helper import make_error
 from discord.ext.commands import AutoShardedBot
 
 init(autoreset=True)
-
+os.environ["JISHAKU_HIDE"] = "True"
+os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
+os.environ["JISHAKU_NO_DM_TRACEBACK"] = "True"
 
 class Bot(AutoShardedBot):
     def __init__(self, **kwargs):
@@ -25,7 +29,8 @@ class Bot(AutoShardedBot):
                 everyone=False, roles=False, replied_user=False),
             intents=discord.Intents.all(),
             status=discord.Status.online,
-            activity=discord.ActivityType.listening, name=config.bot_activity,
+            activity=discord.Activity(
+                type=discord.ActivityType.listening, name=config.bot_activity),
             **kwargs
         )
 
@@ -36,8 +41,6 @@ class Bot(AutoShardedBot):
 
         self.boot_time = discord.utils.utcnow()
         self.support_server = config.support_server
-        self.invite_link = discord.utils.oauth_url(
-            self.id, permissions=discord.Permissions.all())
         self.bot_owner_ids = config.bot_owners
 
         for extensions in config.extentions:
@@ -56,6 +59,10 @@ class Bot(AutoShardedBot):
     @property
     def db(self):
         return Tortoise.get_connection("default")._pool
+
+    @property
+    def invite_link(self):
+        return discord.utils.oauth_url(self.id, permissions=discord.Permissions.all())
 
     async def init_tourtoise(self):
         self.session = aiohttp.ClientSession(loop=self.loop)
@@ -78,6 +85,9 @@ class Bot(AutoShardedBot):
     def get_message(self, message_id: int) -> discord.Message:
         """Gets the message from the cache"""
         return self._connection._get_message(message_id)
+
+    async def get_context(self, message, *, cls=Context):
+        return await super().get_context(message, cls=cls)
 
     async def close(self):
         await super().close()

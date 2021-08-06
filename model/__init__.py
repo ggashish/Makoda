@@ -1,2 +1,2 @@
-from functions import *
-from models import *
+from model.functions import *
+from model.models import *

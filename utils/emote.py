@@ -1,2 +1,2 @@
-confirm = ""
-deny = ""
+confirm = "<:check:856366572096061450>"
+deny = "<:xmark:856366622088101908>"
