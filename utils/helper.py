@@ -1,9 +1,14 @@
 import traceback
 import discord
+import itertools
+import datetime
 from discord.utils import escape_markdown
 import mystbin
+import pygit2
 
 from typing import Union
+from collections import Counter
+from glob import glob
 from utils.paginator import pages, InteractionPages
 
 
@@ -148,3 +153,33 @@ async def kwargs_to_embed(ctx, **kwargs):
                                       name=field["name"], value=field["value"], inline=False)
 
     return embed
+
+def truncate_commit(value, max_length=128, suffix="..."):
+    string_value = str(value)
+    string_truncated = string_value[: min(len(string_value), (max_length - len(suffix)))]
+    suffix = suffix if len(string_value) > max_length else ""
+    return string_truncated + suffix
+
+def format_commit(commit):  # source: R danny
+        short, _, _ = commit.message.partition("\n")
+        short_sha2 = commit.hex[0:6]
+        commit_tz = datetime.timezone(datetime.timedelta(minutes=commit.commit_time_offset))
+        commit_time = datetime.datetime.fromtimestamp(commit.commit_time).astimezone(commit_tz)
+
+        offset = discord_timestamp(commit_time.astimezone(datetime.timezone.utc))
+        return f"[`{short_sha2}`](https://github.com/ggashish/Makoda/commit/{commit.hex}) {truncate_commit(short,40)} ({offset})"
+
+def get_last_commits(count=3):
+    repo = pygit2.Repository(".git")
+    commits = list(itertools.islice(repo.walk(repo.head.target, pygit2.GIT_SORT_TOPOLOGICAL), count))
+    return "\n".join(format_commit(c) for c in commits)
+
+def linecount():
+    ctr = Counter()
+
+    for ctr["files"], f in enumerate(glob("./**/*.py", recursive=True)):
+        with open(f, encoding="UTF-8") as fp:
+            for ctr["lines"], line in enumerate(fp, ctr["lines"]):
+                line = line.lstrip()
+
+    return ctr["lines"]

@@ -38,6 +38,7 @@ class Bot(AutoShardedBot):
         self.loop = asyncio.get_event_loop()
         self.colour = config.embed_colour
         self.version = config.version
+        self.source_code = config.source_code
 
         self.boot_time = discord.utils.utcnow()
         self.support_server = config.support_server
@@ -62,7 +63,7 @@ class Bot(AutoShardedBot):
 
     @property
     def invite_link(self):
-        return discord.utils.oauth_url(self.id, permissions=discord.Permissions.all())
+        return discord.utils.oauth_url(self.user.id, permissions=discord.Permissions.all())
 
     async def init_tourtoise(self):
         self.session = aiohttp.ClientSession(loop=self.loop)
